@@ -65,37 +65,49 @@ frontendはNext.jsを用いて作成した。
 データベースはpostgresを使った。テーブルは以下の通り。
 ```mermaid
 erDiagram
-
-results {
-  uuid   id "結果id"
+tasks {
+  uuid   id       "タスクid"
+  string type     "課題のタイプ"
   string username "ユーザーネーム"
-  string tasktype "課題のタイプ（直線、円）" 
-  real   param1   "課題図形のパラメータ（座標など）"
-  real   param2   "課題図形のパラメータ（座標など）" 
-  real   param3   "課題図形のパラメータ（座標など）"
-  real   param4   "課題図形のパラメータ（座標など）"
-  real   param5   "課題図形のパラメータ（座標など）"
-  real   param6   "課題図形のパラメータ（座標など）"
+  float  score    "スコア"
 }
+```
 
+```mermaid
+erDiagram
+results {
+  uuid   id       "結果id"
+  uuid   task_id  "タスクid"
+  string type     "タイプ（直線、円）" 
+  float  score    "スコア"
+}
+```
+
+```mermaid
+erDiagram
 result_param {
   bigint id      "result_time_series_id"
   uuid result_id "結果id"
   string name    "パラメータの名前（x,y,r,theta,...)"
   real value     "パラメータの値"
 }
+```
 
+```mermaid
+erDiagram
 result_time_series {
-  bigint id      "result_time_series_id"
-  uuid result_id "結果id"
-  integer index  "結果のindex"
-  integer time   "そのindexのtime"
-  integer x      "そのindexのx座標"
-  integer y      "そのindexのy座標"
-  real distance  "そのindexの目標図形とのズレ" 
-  real pressure  "そのindexの筆圧" 
-  real altitude  "そのindexのaltitude" 
-  real azimuth   "そのindexのazimuth" 
+  bigint id        "result_time_series_id"
+  uuid result_id   "結果id"
+  integer index    "結果のindex"
+  integer time     "そのindexのtime"
+  integer x_target "そのindexの目標のx座標"
+  integer y_target "そのindexの目標のy座標"
+  integer x        "そのindexのx座標"
+  integer y        "そのindexのy座標"
+  real distance    "そのindexの目標図形とのズレ" 
+  real pressure    "そのindexの筆圧" 
+  real altitude    "そのindexのaltitude" 
+  real azimuth     "そのindexのazimuth" 
 }
 ```
 
