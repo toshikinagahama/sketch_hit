@@ -160,5 +160,110 @@ func SaveResult(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"result": 0,
+		"task":   task_,
+	})
+}
+
+func GetResults(c echo.Context) error {
+	db := database.GetDB()
+
+	//json_map := make(map[string]interface{})
+	//err := json.NewDecoder(c.Request().Body).Decode(&json_map)
+	//if err != nil {
+	//	return c.JSON(http.StatusOK, echo.Map{
+	//		"result": -1,
+	//	})
+	//}
+	var results []model.Result
+	err := db.Find(&results).Error
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -2,
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"result":  0,
+		"results": results,
+	})
+}
+
+func GetTasks(c echo.Context) error {
+	db := database.GetDB()
+
+	//json_map := make(map[string]interface{})
+	//err := json.NewDecoder(c.Request().Body).Decode(&json_map)
+	//if err != nil {
+	//	return c.JSON(http.StatusOK, echo.Map{
+	//		"result": -1,
+	//	})
+	//}
+	var tasks []model.Task
+	err := db.Find(&tasks).Error
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -2,
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"result":  0,
+		"results": tasks,
+	})
+}
+
+func GetResultTimeSeries(c echo.Context) error {
+	db := database.GetDB()
+
+	json_map := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
+	if err != nil {
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -1,
+		})
+	}
+	id := json_map["id"].(string)
+	//log.Println(json_map)
+	var result_ts []model.ResultTimeSeries
+	err = db.Find(&result_ts, "result_id = ?", id).Error
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -2,
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"result":  0,
+		"results": result_ts,
+	})
+}
+
+func GetResultParam(c echo.Context) error {
+	db := database.GetDB()
+
+	json_map := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
+	if err != nil {
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -1,
+		})
+	}
+	id := json_map["id"].(string)
+	//log.Println(json_map)
+	var result_params []model.ResultParam
+	err = db.Find(&result_params, "result_id = ?", id).Error
+	if err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -2,
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"result":  0,
+		"results": result_params,
 	})
 }

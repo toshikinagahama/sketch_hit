@@ -95,6 +95,8 @@ const Circle_1 = () => {
 
           let pressure = 0.1;
           let x, y;
+          if (e.touches[0]['touchType'] == 'undefined') return;
+          if (e.touches[0]['touchType'] != 'stylus') return;
           if (e.touches && e.touches[0] && typeof e.touches[0]['force'] !== 'undefined') {
             if (e.touches[0]['force'] > 0) {
               pressure = e.touches[0]['force'];
@@ -299,20 +301,20 @@ const Circle_1 = () => {
         <Scatter height={300} width={800} data={data} options={options} ref={chartRef} />
   </div>*/}
 
-      <div className="absolute flex flex-col justify-center mx-auto top-8 left-72">
+      <div className="absolute top-8 left-72 mx-auto flex flex-col justify-center">
         <div className="mb-2">あなたの名前： {user.name}</div>
         <div>点線の円をなぞってください</div>
       </div>
 
       <div
-        className="absolute px-4 py-2 text-white bg-orange-800 top-4 right-4 rounded-md"
+        className="absolute top-4 right-4 rounded-md bg-orange-800 px-4 py-2 text-white"
         onClick={(e) => handleSendResultButtonClicked(e)}
       >
         結果を送信
       </div>
 
       <div
-        className="absolute px-2 py-2 text-white bg-black top-4 left-4 rounded-md"
+        className="absolute top-4 left-4 rounded-md bg-black px-2 py-2 text-white"
         onClick={(e) => handleClearCanvasButtonClicked(e)}
       >
         clear canvas

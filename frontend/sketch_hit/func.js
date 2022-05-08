@@ -23,6 +23,7 @@ export const getCircleHandwritingInfomation = (lines, circles) => {
   //    lines[i][j].t -= lines[i][0].t;
   //  }
   //}
+  console.log(lines);
   let dataArray = [];
   let num_range = 100; //区間を何等分にするか
   circles.map((c, index) => {
@@ -37,6 +38,8 @@ export const getCircleHandwritingInfomation = (lines, circles) => {
       //実際の描画線との交点を探す
       for (let j = 0; j < lines.length; j++) {
         let points = lines[j];
+        if (points == undefined) continue;
+        if (points.length == 0) continue;
         let distance0 = Math.sqrt(
           (points[0].x - c.x) * (points[0].x - c.x) + (points[0].y - c.y) * (points[0].y - c.y)
         );
