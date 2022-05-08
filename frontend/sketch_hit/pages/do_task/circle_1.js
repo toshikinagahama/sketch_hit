@@ -8,13 +8,16 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { domain_db, http_protcol } from '../../global';
 import { useRecoilValue } from 'recoil';
 import { userState } from '../../components/atoms';
 import { drawCircles, getCircleHandwritingInfomation } from '../../func';
+import { useRouter } from 'next/router';
 
 ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const Circle_1 = () => {
+  const router = useRouter();
   let canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const [context, setContext] = useState(null);
@@ -204,7 +207,7 @@ const Circle_1 = () => {
     task_result['results_time_series'] = dataArray_all;
     console.log(task_result);
 
-    const res = await fetch(`http://192.168.10.6:1323/sketch_hit/save_result`, {
+    const res = await fetch(`${http_protcol}://${domain_db}/save_result`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -214,6 +217,12 @@ const Circle_1 = () => {
     const json_data = await res.json().catch(() => null);
     console.log(json_data);
     const result = json_data['result'];
+    if (result == 0) {
+      alert('送信が終了しました');
+      router.push('/');
+    } else {
+      alert('送信に失敗しました');
+    }
     //let data = []; //グラフのデータ
     //for (let i = 0; i < dataArray[0].length; i++) {
     //  switch (type) {
@@ -290,19 +299,20 @@ const Circle_1 = () => {
         <Scatter height={300} width={800} data={data} options={options} ref={chartRef} />
   </div>*/}
 
-      <div className="absolute top-12 left-72 mx-auto flex flex-row justify-center">
-        点線の円をなぞってください
+      <div className="absolute flex flex-col justify-center mx-auto top-8 left-72">
+        <div className="mb-2">あなたの名前： {user.name}</div>
+        <div>点線の円をなぞってください</div>
       </div>
 
       <div
-        className="absolute top-4 right-4 rounded-md bg-orange-800 px-4 py-2 text-white"
+        className="absolute px-4 py-2 text-white bg-orange-800 top-4 right-4 rounded-md"
         onClick={(e) => handleSendResultButtonClicked(e)}
       >
         結果を送信
       </div>
 
       <div
-        className="absolute top-4 left-4 rounded-md bg-black px-2 py-2 text-white"
+        className="absolute px-2 py-2 text-white bg-black top-4 left-4 rounded-md"
         onClick={(e) => handleClearCanvasButtonClicked(e)}
       >
         clear canvas
