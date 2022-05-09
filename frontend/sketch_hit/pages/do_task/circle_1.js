@@ -95,6 +95,7 @@ const Circle_1 = () => {
 
           let pressure = 0.1;
           let x, y;
+          if (e.touches == null) return;
           if (e.touches[0]['touchType'] == 'undefined') return;
           if (e.touches[0]['touchType'] != 'stylus') return;
           if (e.touches && e.touches[0] && typeof e.touches[0]['force'] !== 'undefined') {
@@ -208,6 +209,16 @@ const Circle_1 = () => {
     });
     task_result['results_time_series'] = dataArray_all;
     console.log(task_result);
+    let score_mean = 0;
+    let cnt_valid_score = 0;
+    task_result['results'].map((result, index) => {
+      if ((result['score'] -= -1)) {
+        score_mean += result['score'];
+        cnt_valid_score++;
+      }
+    });
+    if (cnt_valid_score != 0) score_mean /= cnt_valid_score;
+    else score_mean = 0;
 
     const res = await fetch(`${http_protcol}://${domain_db}/save_result`, {
       method: 'POST',
@@ -220,8 +231,8 @@ const Circle_1 = () => {
     console.log(json_data);
     const result = json_data['result'];
     if (result == 0) {
-      alert('送信が終了しました');
-      router.push('/');
+      alert(`送信が終了しました。スコアは${score_mean}です。`);
+      router.push('/select_task');
     } else {
       alert('送信に失敗しました');
     }

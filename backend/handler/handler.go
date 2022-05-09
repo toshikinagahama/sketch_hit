@@ -167,38 +167,44 @@ func SaveResult(c echo.Context) error {
 func GetResults(c echo.Context) error {
 	db := database.GetDB()
 
-	//json_map := make(map[string]interface{})
-	//err := json.NewDecoder(c.Request().Body).Decode(&json_map)
-	//if err != nil {
-	//	return c.JSON(http.StatusOK, echo.Map{
-	//		"result": -1,
-	//	})
-	//}
-	var results []model.Result
-	err := db.Find(&results).Error
-	if err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -2,
-		})
-	}
+	score_max := c.QueryParam("score_max")
+	score_min := c.QueryParam("score_min")
+	log.Println(score_max, score_min)
+	if score_max == "" || score_min == "" {
+		var results []model.Result
+		err := db.Find(&results).Error
+		if err != nil {
+			log.Println(err)
+			return c.JSON(http.StatusOK, echo.Map{
+				"result": -2,
+			})
+		}
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"result":  0,
-		"results": results,
-	})
+		return c.JSON(http.StatusOK, echo.Map{
+			"result":  0,
+			"results": results,
+		})
+	} else {
+		var results []model.Result
+		err := db.Find(&results, "score >= ? AND score <= ?", score_min, score_max).Error
+		if err != nil {
+			log.Println(err)
+			return c.JSON(http.StatusOK, echo.Map{
+				"result": -3,
+			})
+		}
+
+		return c.JSON(http.StatusOK, echo.Map{
+			"result":  0,
+			"results": results,
+		})
+
+	}
 }
 
 func GetTasks(c echo.Context) error {
 	db := database.GetDB()
 
-	//json_map := make(map[string]interface{})
-	//err := json.NewDecoder(c.Request().Body).Decode(&json_map)
-	//if err != nil {
-	//	return c.JSON(http.StatusOK, echo.Map{
-	//		"result": -1,
-	//	})
-	//}
 	var tasks []model.Task
 	err := db.Find(&tasks).Error
 	if err != nil {
