@@ -10,6 +10,28 @@ export const drawCircles = (ctx, circles) => {
     ctx.strokeStyle = 'black';
     ctx.lineWidth = 1;
     ctx.stroke();
+    ctx.closePath();
+  });
+};
+
+/**
+ * @brief 円を描画
+ *
+ */
+export const drawLines = (ctx, lines) => {
+  lines.map((line, index) => {
+    let endPoint = { x: line.x, y: line.y };
+    let theta = (line.a * Math.PI) / 180;
+    endPoint.x += line.l * Math.cos(theta);
+    endPoint.y += line.l * Math.sin(theta);
+    ctx.beginPath();
+    ctx.moveTo(line.x, line.y);
+    ctx.lineTo(endPoint.x, endPoint.y);
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.closePath();
   });
 };
 
@@ -35,6 +57,7 @@ export const getCircleHandwritingInfomation = (lines, circles) => {
         y: c.r * Math.sin(((2.0 * Math.PI) / num_range) * i) + c.y,
       };
       let l1 = { a: q.y - c.y, b: -q.x + c.x, c: (q.x - c.x) * c.y - (q.y - c.y) * c.x };
+      let tmpData = []; //候補のデータ。交わったデータの中で、筆圧を比較し、筆圧が高かったものを採用する。
       //実際の描画線との交点を探す
       for (let j = 0; j < lines.length; j++) {
         let points = lines[j];
@@ -80,7 +103,7 @@ export const getCircleHandwritingInfomation = (lines, circles) => {
               t0 = Math.abs(p.y - p0.y);
 
               if (t1 == 0 && t0 == 0) {
-                dataArray[dataArray.length - 1].push({
+                tmpData.push({
                   index: i,
                   t: p0.t,
                   x_target: q.x,
@@ -97,7 +120,7 @@ export const getCircleHandwritingInfomation = (lines, circles) => {
                 let altitude = (t1 / (t1 + t0)) * p0.altitude + (t0 / (t1 + t0)) * p1.altitude;
                 let azimuth = (t1 / (t1 + t0)) * p0.azimuth + (t0 / (t1 + t0)) * p1.azimuth;
                 let time = (t1 / (t1 + t0)) * p0.t + (t0 / (t1 + t0)) * p1.t;
-                dataArray[dataArray.length - 1].push({
+                tmpData.push({
                   index: i,
                   t: time,
                   x_target: q.x,
@@ -115,7 +138,7 @@ export const getCircleHandwritingInfomation = (lines, circles) => {
               let altitude = (t1 / (t1 + t0)) * p0.altitude + (t0 / (t1 + t0)) * p1.altitude;
               let azimuth = (t1 / (t1 + t0)) * p0.azimuth + (t0 / (t1 + t0)) * p1.azimuth;
               let time = (t1 / (t1 + t0)) * p0.t + (t0 / (t1 + t0)) * p1.t;
-              dataArray[dataArray.length - 1].push({
+              tmpData.push({
                 index: i,
                 t: time,
                 x_target: q.x,
@@ -141,9 +164,16 @@ export const getCircleHandwritingInfomation = (lines, circles) => {
             //context.strokeStyle = 'green';
             //context.lineWidth = 1;
             //context.stroke();
-            break;
+            //break;
           }
         }
+      }
+      if (tmpData.length > 0) {
+        let f = tmpData.map(function (p) {
+          return p.f;
+        });
+        let adoptIndex = f.indexOf(Math.max.apply(null, f));
+        dataArray[dataArray.length - 1].push(tmpData[adoptIndex]);
       }
     }
   });
