@@ -25,6 +25,16 @@ export default function Select_task(pageProps) {
             <a className="mt-4 w-6/12 rounded-md bg-black py-2 text-center text-white">円</a>
           </Link>
         </div>
+        <div className="my-4 flex w-full flex-row justify-center">
+          <Link href="/do_task/line_1">
+            <a className="mt-4 w-6/12 rounded-md bg-black py-2 text-center text-white">横線</a>
+          </Link>
+        </div>
+        <div className="my-4 flex w-full flex-row justify-center">
+          <Link href="/do_task/line_2">
+            <a className="mt-4 w-6/12 rounded-md bg-black py-2 text-center text-white">縦線</a>
+          </Link>
+        </div>
       </div>
     </div>
   );
