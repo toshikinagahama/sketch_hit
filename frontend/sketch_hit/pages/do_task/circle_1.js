@@ -8,6 +8,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { Line, Scatter } from 'react-chartjs-2';
 import { domain_db, http_protcol } from '../../global';
 import { useRecoilValue } from 'recoil';
 import { userState } from '../../components/atoms';
@@ -19,6 +20,22 @@ ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend);
 const Circle_1 = () => {
   const router = useRouter();
   let canvasRef = useRef(null);
+  let type = 0;
+  const chartRef = useRef();
+  const data = {
+    datasets: [
+      {
+        label: ' dataset',
+        data: [],
+        showLine: true,
+        backgroundColor: 'rgba(255, 99, 132, 1)',
+      },
+    ],
+  };
+  const options = {
+    maintainAspectRatio: false,
+  };
+
   const [canvas, setCanvas] = useState(null);
   const [context, setContext] = useState(null);
   const [screenSize, setScreenSize] = useState({ w: 0, h: 0 });
@@ -96,8 +113,8 @@ const Circle_1 = () => {
           let pressure = 0.1;
           let x, y;
           if (e.touches == null) return;
-          if (e.touches[0]['touchType'] == 'undefined') return;
-          if (e.touches[0]['touchType'] != 'stylus') return;
+          //if (e.touches[0]['touchType'] == 'undefined') return;
+          //if (e.touches[0]['touchType'] != 'stylus') return;
           if (e.touches && e.touches[0] && typeof e.touches[0]['force'] !== 'undefined') {
             if (e.touches[0]['force'] > 0) {
               pressure = e.touches[0]['force'];
@@ -236,30 +253,32 @@ const Circle_1 = () => {
     } else {
       alert('送信に失敗しました');
     }
+
     //let data = []; //グラフのデータ
-    //for (let i = 0; i < dataArray[0].length; i++) {
+    //for (let i = 0; i < dataArray_all[0].length; i++) {
     //  switch (type) {
     //    case 0:
-    //      data.push({ x: dataArray[0][i].index, y: dataArray[i].d });
+    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].d });
     //      break;
     //    case 1:
-    //      data.push({ x: dataArray[0][i].index, y: dataArray[i].f });
+    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].f });
     //      break;
     //    case 2:
-    //      data.push({ x: dataArray[i].index, y: dataArray[i].altitude });
+    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].altitude });
     //      break;
     //    case 3:
-    //      data.push({ x: dataArray[i].index, y: dataArray[i].azimuth });
+    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].azimuth });
     //      break;
     //    case 4:
-    //      data.push({ x: dataArray[i].index, y: dataArray[i].t });
+    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].t });
     //      break;
     //    default:
     //      break;
     //  }
     //}
-    ////console.log(chartRef.current);
+    //console.log(data);
     //let chartInstance = chartRef.current;
+    //chartInstance.data.datasets[0].data = [];
     //chartInstance.data.datasets[0].data = data;
     //switch (type) {
     //  case 0:
@@ -301,34 +320,36 @@ const Circle_1 = () => {
         <title>Apple Pencil Test</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="relative">
+      <div className="relative h-screen w-screen">
         <canvas
           ref={canvasRef}
           className="absolute bg-gradient-to-br from-slate-300 to-slate-400"
         ></canvas>
-      </div>
 
-      {/*<div className="absolute flex flex-col items-center justify-center px-2 py-2 bottom-4 rounded-md">
-        <Scatter height={300} width={800} data={data} options={options} ref={chartRef} />
-  </div>*/}
+        {/*
+        <div className="absolute bottom-4 flex flex-col items-center justify-center rounded-md px-2 py-2">
+          <Scatter height={300} width={800} data={data} options={options} ref={chartRef} />
+        </div>
+        */}
 
-      <div className="absolute top-8 left-72 mx-auto flex flex-col justify-center">
-        <div className="mb-2">あなたの名前： {user.name}</div>
-        <div>点線の円をなぞってください</div>
-      </div>
+        <div className="absolute top-8 left-72 mx-auto flex flex-col justify-center">
+          <div className="mb-2">あなたの名前： {user.name}</div>
+          <div>点線の円をなぞってください</div>
+        </div>
 
-      <div
-        className="absolute top-4 right-4 rounded-md bg-orange-800 px-4 py-2 text-white"
-        onClick={(e) => handleSendResultButtonClicked(e)}
-      >
-        結果を送信
-      </div>
+        <div
+          className="absolute top-4 right-4 rounded-md bg-orange-800 px-4 py-2 text-white"
+          onClick={(e) => handleSendResultButtonClicked(e)}
+        >
+          結果を送信
+        </div>
 
-      <div
-        className="absolute top-4 left-4 rounded-md bg-black px-2 py-2 text-white"
-        onClick={(e) => handleClearCanvasButtonClicked(e)}
-      >
-        clear canvas
+        <div
+          className="absolute top-4 left-4 rounded-md bg-black px-2 py-2 text-white"
+          onClick={(e) => handleClearCanvasButtonClicked(e)}
+        >
+          clear canvas
+        </div>
       </div>
     </div>
   );
