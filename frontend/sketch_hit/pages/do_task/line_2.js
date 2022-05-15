@@ -102,8 +102,8 @@ const Line_2 = () => {
           let pressure = 0.1;
           let x, y;
           if (e.touches == null) return;
-          //if (e.touches[0]['touchType'] == 'undefined') return;
-          //if (e.touches[0]['touchType'] != 'stylus') return;
+          if (e.touches[0]['touchType'] == 'undefined') return;
+          if (e.touches[0]['touchType'] != 'stylus') return;
           if (e.touches && e.touches[0] && typeof e.touches[0]['force'] !== 'undefined') {
             if (e.touches[0]['force'] > 0) {
               pressure = e.touches[0]['force'];
