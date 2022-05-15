@@ -133,6 +133,61 @@ func SaveResult(c echo.Context) error {
 			}
 		}
 
+		if result_type == "line" {
+			//円の場合
+			result_param_ := model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "x",
+				Value:    (float32)(result["x"].(float64)),
+			}
+
+			err = db.Debug().Create(&result_param_).Error
+			if err != nil {
+				return c.JSON(http.StatusOK, echo.Map{
+					"result": -6,
+				})
+			}
+
+			result_param_ = model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "y",
+				Value:    (float32)(result["y"].(float64)),
+			}
+
+			err = db.Debug().Create(&result_param_).Error
+			if err != nil {
+				return c.JSON(http.StatusOK, echo.Map{
+					"result": -6,
+				})
+			}
+
+			result_param_ = model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "l",
+				Value:    (float32)(result["l"].(float64)),
+			}
+
+			err = db.Debug().Create(&result_param_).Error
+			if err != nil {
+				return c.JSON(http.StatusOK, echo.Map{
+					"result": -6,
+				})
+			}
+
+			result_param_ = model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "a",
+				Value:    (float32)(result["a"].(float64)),
+			}
+
+			err = db.Debug().Create(&result_param_).Error
+			if err != nil {
+				return c.JSON(http.StatusOK, echo.Map{
+					"result": -6,
+				})
+			}
+		}
+
 		for i := 0; i < len(result_time_series); i++ {
 			result_ts := result_time_series[i].(map[string]interface{})
 			log.Println(result_ts)
