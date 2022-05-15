@@ -12,12 +12,12 @@ import { Line, Scatter } from 'react-chartjs-2';
 import { domain_db, http_protcol } from '../../global';
 import { useRecoilValue } from 'recoil';
 import { userState } from '../../components/atoms';
-import { drawCircles, getCircleHandwritingInfomation } from '../../func';
+import { drawLines, getLineHandwritingInfomation } from '../../func';
 import { useRouter } from 'next/router';
 
 ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend);
 
-const Circle_1 = () => {
+const Line_1 = () => {
   const router = useRouter();
   let canvasRef = useRef(null);
   let type = 0;
@@ -39,7 +39,7 @@ const Circle_1 = () => {
   const [canvas, setCanvas] = useState(null);
   const [context, setContext] = useState(null);
   const [screenSize, setScreenSize] = useState({ w: 0, h: 0 });
-  const [targetCircles, setTargetCircles] = useState([]);
+  const [targetLines, setTargetLines] = useState([]);
   const pointsRef = useRef();
   const linesRef = useRef();
   const [points, setPoints] = useState([]);
@@ -53,23 +53,12 @@ const Circle_1 = () => {
     //setting screen size
     setScreenSize({ w: window.innerWidth, h: window.innerHeight });
 
-    //set target circle
-    let cs = []; //circles
-    cs.push(
-      { x: 100, y: 200, r: 50 },
-      { x: 300, y: 200, r: 50 },
-      { x: 500, y: 200, r: 50 },
-      { x: 700, y: 200, r: 50 },
-      { x: 100, y: 400, r: 50 },
-      { x: 300, y: 400, r: 50 },
-      { x: 500, y: 400, r: 50 },
-      { x: 700, y: 400, r: 50 },
-      { x: 100, y: 600, r: 50 },
-      { x: 300, y: 600, r: 50 },
-      { x: 500, y: 600, r: 50 },
-      { x: 700, y: 600, r: 50 }
-    );
-    setTargetCircles(cs);
+    //set target lines
+    let ls = []; //lines
+    for (let i = 0; i < 6; i++) {
+      ls.push({ x: 100, y: 100 * (i + 1) + 150, l: 600, a: 0 });
+    }
+    setTargetLines(ls);
     setStartTIme(performance.now());
   }, []);
 
@@ -90,7 +79,7 @@ const Circle_1 = () => {
       canvas.style.height = screenSize.h;
       canvas.width = screenSize.w;
       canvas.height = screenSize.h;
-      drawCircles(context, targetCircles);
+      drawLines(context, targetLines);
       for (const ev of ['touchstart', 'mousedown']) {
         canvas.addEventListener(ev, function (e) {
           console.log('touch start');
@@ -204,11 +193,11 @@ const Circle_1 = () => {
    *
    */
   const handleSendResultButtonClicked = async (e) => {
-    const dataArray_all = getCircleHandwritingInfomation(lines, targetCircles);
+    const dataArray_all = getLineHandwritingInfomation(context, lines, targetLines);
     let task_result = {};
-    task_result['task'] = { username: user.name, type: 'circle_1' };
+    task_result['task'] = { username: user.name, type: 'line_1' };
     task_result['results'] = [];
-    targetCircles.map((c, i) => {
+    targetLines.map((l, i) => {
       let dataArray = dataArray_all[i];
       //console.log(dataArray);
       let tmp = 0.0; //スコアは仮で、distanceの絶対値の合計を半径で割ったものとする。
@@ -217,12 +206,12 @@ const Circle_1 = () => {
       });
       if (dataArray.length != 0) {
         tmp /= dataArray.length;
-        tmp /= c.r;
+        tmp /= 50;
         tmp = 100 * (1.0 - tmp * 5.0);
       } else {
         tmp = -1;
       }
-      task_result['results'].push({ type: 'circle', score: tmp, x: c.x, y: c.y, r: c.r });
+      task_result['results'].push({ type: 'line', score: tmp, x: l.x, y: l.y, l: l.l, a: l.a });
     });
     task_result['results_time_series'] = dataArray_all;
     console.log(task_result);
@@ -236,7 +225,6 @@ const Circle_1 = () => {
     });
     if (cnt_valid_score != 0) score_mean /= cnt_valid_score;
     else score_mean = 0;
-
     const res = await fetch(`${http_protcol}://${domain_db}/save_result`, {
       method: 'POST',
       headers: {
@@ -253,55 +241,54 @@ const Circle_1 = () => {
     } else {
       alert('送信に失敗しました');
     }
-
-    //let data = []; //グラフのデータ
-    //for (let i = 0; i < dataArray_all[0].length; i++) {
-    //  switch (type) {
-    //    case 0:
-    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].d });
-    //      break;
-    //    case 1:
-    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].f });
-    //      break;
-    //    case 2:
-    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].altitude });
-    //      break;
-    //    case 3:
-    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].azimuth });
-    //      break;
-    //    case 4:
-    //      data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].t });
-    //      break;
-    //    default:
-    //      break;
-    //  }
-    //}
-    //console.log(data);
-    //let chartInstance = chartRef.current;
-    //chartInstance.data.datasets[0].data = [];
-    //chartInstance.data.datasets[0].data = data;
-    //switch (type) {
-    //  case 0:
-    //    chartInstance.data.datasets[0].label = 'distance';
-    //    break;
-    //  case 1:
-    //    chartInstance.data.datasets[0].label = 'pressure';
-    //    break;
-    //  case 2:
-    //    chartInstance.data.datasets[0].label = 'altitude';
-    //    break;
-    //  case 3:
-    //    chartInstance.data.datasets[0].label = 'azimuth';
-    //    break;
-    //  case 4:
-    //    chartInstance.data.datasets[0].label = 'time';
-    //    break;
-    //  default:
-    //    break;
-    //}
-    //chartInstance.update();
-    //type++;
-    //if (type >= 5) type = 0;
+    let data = []; //グラフのデータ
+    for (let i = 0; i < dataArray_all[0].length; i++) {
+      switch (type) {
+        case 0:
+          data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].d });
+          break;
+        case 1:
+          data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].f });
+          break;
+        case 2:
+          data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].altitude });
+          break;
+        case 3:
+          data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].azimuth });
+          break;
+        case 4:
+          data.push({ x: dataArray_all[0][i].index, y: dataArray_all[0][i].t });
+          break;
+        default:
+          break;
+      }
+    }
+    console.log(data);
+    let chartInstance = chartRef.current;
+    chartInstance.data.datasets[0].data = [];
+    chartInstance.data.datasets[0].data = data;
+    switch (type) {
+      case 0:
+        chartInstance.data.datasets[0].label = 'distance';
+        break;
+      case 1:
+        chartInstance.data.datasets[0].label = 'pressure';
+        break;
+      case 2:
+        chartInstance.data.datasets[0].label = 'altitude';
+        break;
+      case 3:
+        chartInstance.data.datasets[0].label = 'azimuth';
+        break;
+      case 4:
+        chartInstance.data.datasets[0].label = 'time';
+        break;
+      default:
+        break;
+    }
+    chartInstance.update();
+    type++;
+    if (type >= 5) type = 0;
   };
 
   /**
@@ -312,7 +299,7 @@ const Circle_1 = () => {
     setPoints([]);
     setLines([]);
     context.clearRect(0, 0, canvas.width, canvas.height);
-    drawCircles(context, targetCircles);
+    drawLines(context, targetLines);
   };
   return (
     <div>
@@ -326,15 +313,13 @@ const Circle_1 = () => {
           className="absolute bg-gradient-to-br from-slate-300 to-slate-400"
         ></canvas>
 
-        {/*
         <div className="absolute bottom-4 flex flex-col items-center justify-center rounded-md px-2 py-2">
           <Scatter height={300} width={800} data={data} options={options} ref={chartRef} />
         </div>
-        */}
 
         <div className="absolute top-8 left-72 mx-auto flex flex-col justify-center">
           <div className="mb-2">あなたの名前： {user.name}</div>
-          <div>点線の円をなぞってください</div>
+          <div>点線の直線をなぞってください</div>
         </div>
 
         <div
@@ -355,4 +340,4 @@ const Circle_1 = () => {
   );
 };
 
-export default Circle_1;
+export default Line_1;
