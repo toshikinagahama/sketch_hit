@@ -1,0 +1,4 @@
+docker stop (docker ps | grep sketchhit | awk '{print $1}')
+docker rm (docker ps -a | grep sketchhit | awk '{print $1}')
+docker rmi (docker image ls | grep sketchhit_sketch_hit_backend | awk '{print $3}')
+
