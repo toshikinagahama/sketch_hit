@@ -241,8 +241,8 @@ func GetResults(c echo.Context) error {
 		})
 	} else {
 		var results []model.Result
-		err := db.Find(&results, "score >= ? AND score <= ?", score_min, score_max).Error
-		if err != nil {
+
+		if err := db.Find(&results, "score >= ? AND score <= ?", score_min, score_max).Error; err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusOK, echo.Map{
 				"result": -3,
@@ -261,8 +261,7 @@ func GetTasks(c echo.Context) error {
 	db := database.GetDB()
 
 	var tasks []model.Task
-	err := db.Find(&tasks).Error
-	if err != nil {
+	if err := db.Find(&tasks).Error; err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusOK, echo.Map{
 			"result": -2,
@@ -278,18 +277,20 @@ func GetTasks(c echo.Context) error {
 func GetResultTimeSeries(c echo.Context) error {
 	db := database.GetDB()
 
-	json_map := make(map[string]interface{})
-	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
-	if err != nil {
+	type Payload struct {
+		IDs []uuid.UUID
+	}
+	payload := Payload{}
+	if err := c.Bind(&payload); err != nil {
+		log.Println(err)
 		return c.JSON(http.StatusOK, echo.Map{
 			"result": -1,
 		})
+
 	}
-	id := json_map["id"].(string)
-	//log.Println(json_map)
-	var result_ts []model.ResultTimeSeries
-	err = db.Find(&result_ts, "result_id = ?", id).Error
-	if err != nil {
+
+	var result model.Result
+	if err := db.Preload("ResultTimeSeriess").Find(&result, payload.IDs).Error; err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusOK, echo.Map{
 			"result": -2,
@@ -298,25 +299,23 @@ func GetResultTimeSeries(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"result":  0,
-		"results": result_ts,
+		"results": result.ResultTimeSeriess,
 	})
 }
 
 func GetResultParam(c echo.Context) error {
 	db := database.GetDB()
 
-	json_map := make(map[string]interface{})
-	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
-	if err != nil {
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -1,
-		})
+	type Payload struct {
+		IDs []uuid.UUID
 	}
-	id := json_map["id"].(string)
-	//log.Println(json_map)
-	var result_params []model.ResultParam
-	err = db.Find(&result_params, "result_id = ?", id).Error
-	if err != nil {
+	payload := Payload{}
+	if err := c.Bind(&payload); err != nil {
+		return err
+	}
+
+	var result model.Result
+	if err := db.Preload("ResultParams").Find(&result, payload.IDs).Error; err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusOK, echo.Map{
 			"result": -2,
@@ -325,6 +324,6 @@ func GetResultParam(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"result":  0,
-		"results": result_params,
+		"results": result.ResultParams,
 	})
 }

@@ -16,6 +16,8 @@ type Task struct {
 	Type     string   `json:"type"`
 	Username string   `json:"username"`
 	Score    *float32 `json:"score" gorm:"type:real"`
+
+	Results []Result
 }
 
 type Result struct {
@@ -23,6 +25,9 @@ type Result struct {
 	TaskID uuid.UUID `json:"task_id" gorm:"type:uuid"`
 	Type   string    `json:"type"`
 	Score  float32   `json:"score" gorm:"type:real"`
+
+	ResultParams      []ResultParam
+	ResultTimeSeriess []ResultTimeSeries
 }
 
 type ResultParam struct {
