@@ -1,10 +1,10 @@
 package main
 
 import (
+	"athlete_data_input/config"
+	"athlete_data_input/database"
+	"athlete_data_input/router"
 	"log"
-	"sketch_hit/config"
-	"sketch_hit/database"
-	"sketch_hit/router"
 )
 
 func main() {

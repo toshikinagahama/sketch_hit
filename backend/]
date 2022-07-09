@@ -1,0 +1,73 @@
+package handler
+
+import (
+	"encoding/json"
+	"log"
+	"net/http"
+
+	_ "athlete_data_input/database"
+	_ "athlete_data_input/model"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo"
+)
+
+func Contains(s []uuid.UUID, e uuid.UUID) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func ResisterUser(c echo.Context) error {
+	//db := database.GetDB()
+	json_map := make(map[string]interface{})
+	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
+	if err != nil {
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -1,
+		})
+	}
+	username, ok := json_map["username"].(string)
+	if ok == true {
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -1,
+			"error":  err,
+		})
+	}
+	log.Println(username)
+	// email := json_map["email"]
+	return c.JSON(http.StatusOK, echo.Map{
+		"result": 0,
+	})
+}
+
+func SaveInputDatas(c echo.Context) error {
+	//db := database.GetDB()
+	return c.JSON(http.StatusOK, echo.Map{
+		"result": 0,
+	})
+}
+
+func GetUser(c echo.Context) error {
+	//db := database.GetDB()
+	return c.JSON(http.StatusOK, echo.Map{
+		"result": 0,
+	})
+}
+
+func GetUsers(c echo.Context) error {
+	//db := database.GetDB()
+	return c.JSON(http.StatusOK, echo.Map{
+		"result": 0,
+	})
+}
+
+func GetInputDatas(c echo.Context) error {
+	//db := database.GetDB()
+	return c.JSON(http.StatusOK, echo.Map{
+		"result": 0,
+	})
+}

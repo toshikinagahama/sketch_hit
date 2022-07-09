@@ -1,28 +1,29 @@
 version: '3.7'
 
 services:
-  sketch_hit_app_database:
+  athlete_data_input_database:
     build:
       context: ./database
       dockerfile: Dockerfile
-    #image: chatapp_database
     volumes:
-     - sketch_hit_db_data:/var/lib/postgresql/data
+     - athlete_data_input_db_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - PGTZ=${PGTZ}
+    ports:
+      - 5432:5432
     restart: always
 
-  sketch_hit_backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    #image: chatapp_backend
-    ports:
-      - 1324:1323
-    restart: always
+  # comment out for develope mode (when developing, the database is needed.)
+  #athlete_data_input_backend:
+  #  build:
+  #    context: ./backend
+  #    dockerfile: Dockerfile
+  #  ports:
+  #    - 1324:1323
+  #  restart: always
 
 volumes:
-  sketch_hit_db_data:
+  athlete_data_input_db_data:

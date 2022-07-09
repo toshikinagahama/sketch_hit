@@ -1,4 +1,4 @@
-module sketch_hit
+module athlete_data_input 
 
 go 1.17
 
@@ -30,7 +30,7 @@ require (
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
-	gorm.io/gorm v1.23.4 // indirect
+	gorm.io/gorm v1.23.4
 )
 
 require (

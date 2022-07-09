@@ -5,8 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"sketch_hit/database"
-	"sketch_hit/model"
+	"athlete_data_input/config"
+	"athlete_data_input/database"
+	"athlete_data_input/model"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo"
@@ -21,309 +22,110 @@ func Contains(s []uuid.UUID, e uuid.UUID) bool {
 	return false
 }
 
-func SaveResult(c echo.Context) error {
+func ResisterUser(c echo.Context) error {
+	cfg, err := config.Load()
 	db := database.GetDB()
-
 	json_map := make(map[string]interface{})
-	err := json.NewDecoder(c.Request().Body).Decode(&json_map)
+	err = json.NewDecoder(c.Request().Body).Decode(&json_map)
 	if err != nil {
-		log.Println(err)
 		return c.JSON(http.StatusOK, echo.Map{
 			"result": -1,
 		})
 	}
-
-	task, ok := json_map["task"].(map[string]interface{})
-	if !ok {
+	sercret, ok := json_map["sercret"].(string)
+	if ok != true {
 		return c.JSON(http.StatusOK, echo.Map{
 			"result": -2,
 		})
 	}
-	results, ok := json_map["results"].([]interface{})
-	if !ok {
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -3,
-		})
-	}
-
-	results_time_series, ok := json_map["results_time_series"].([]interface{})
-	if !ok {
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -4,
-		})
-	}
-
-	//log.Println(results)
-	//log.Println(results_time_series)
-	//log.Println(task)
-	//登録処理
-	task_ := model.Task{
-		Type:     task["type"].(string),
-		Username: task["username"].(string),
-	}
-
-	err = db.Debug().Create(&task_).Error
-	if err != nil {
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -5,
-		})
-	}
-	log.Println(task_.ID)
-	for i := 0; i < len(results); i++ {
-		result := results[i].(map[string]interface{})
-		result_time_series := results_time_series[i].([]interface{})
-		if len(result_time_series) == 0 {
-			continue
+	if sercret == cfg.SercretKey {
+		//resister user
+		username, ok := json_map["username"].(string)
+		if ok != true {
+			return c.JSON(http.StatusOK, echo.Map{
+				"result": -3,
+			})
 		}
-		log.Println(i, result)
-		result_type := result["type"].(string)
-		score, _ := result["score"].(float64)
-		result_ := model.Result{
-			TaskID: task_.ID,
-			Type:   result_type,
-			Score:  (float32)(score),
+		note, ok := json_map["note"].(string)
+		if ok != true {
+			return c.JSON(http.StatusOK, echo.Map{
+				"result": -4,
+			})
 		}
-
-		err = db.Debug().Create(&result_).Error
+		user := model.User{Username: username, Note: note}
+		err := db.Debug().Model(model.User{}).Create(&user).Error
 		if err != nil {
 			return c.JSON(http.StatusOK, echo.Map{
 				"result": -5,
 			})
 		}
-
-		if result_type == "circle" {
-			//円の場合
-			result_param_ := model.ResultParam{
-				ResultID: result_.ID,
-				Key:      "x",
-				Value:    (float32)(result["x"].(float64)),
-			}
-
-			err = db.Debug().Create(&result_param_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -6,
-				})
-			}
-
-			result_param_ = model.ResultParam{
-				ResultID: result_.ID,
-				Key:      "y",
-				Value:    (float32)(result["y"].(float64)),
-			}
-
-			err = db.Debug().Create(&result_param_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -6,
-				})
-			}
-
-			result_param_ = model.ResultParam{
-				ResultID: result_.ID,
-				Key:      "r",
-				Value:    (float32)(result["r"].(float64)),
-			}
-
-			err = db.Debug().Create(&result_param_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -6,
-				})
-			}
-		}
-
-		if result_type == "line" {
-			//円の場合
-			result_param_ := model.ResultParam{
-				ResultID: result_.ID,
-				Key:      "x",
-				Value:    (float32)(result["x"].(float64)),
-			}
-
-			err = db.Debug().Create(&result_param_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -6,
-				})
-			}
-
-			result_param_ = model.ResultParam{
-				ResultID: result_.ID,
-				Key:      "y",
-				Value:    (float32)(result["y"].(float64)),
-			}
-
-			err = db.Debug().Create(&result_param_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -6,
-				})
-			}
-
-			result_param_ = model.ResultParam{
-				ResultID: result_.ID,
-				Key:      "l",
-				Value:    (float32)(result["l"].(float64)),
-			}
-
-			err = db.Debug().Create(&result_param_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -6,
-				})
-			}
-
-			result_param_ = model.ResultParam{
-				ResultID: result_.ID,
-				Key:      "a",
-				Value:    (float32)(result["a"].(float64)),
-			}
-
-			err = db.Debug().Create(&result_param_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -6,
-				})
-			}
-		}
-
-		for i := 0; i < len(result_time_series); i++ {
-			result_ts := result_time_series[i].(map[string]interface{})
-			log.Println(result_ts)
-			result_ts_ := model.ResultTimeSeries{
-				ResultID: result_.ID,
-				Index:    (uint)(result_ts["index"].(float64)),
-				Time:     (int)(result_ts["t"].(float64)),
-				X_target: (float32)(result_ts["x_target"].(float64)),
-				Y_target: (float32)(result_ts["y_target"].(float64)),
-				X:        (float32)(result_ts["x"].(float64)),
-				Y:        (float32)(result_ts["y"].(float64)),
-				Distance: (float32)(result_ts["d"].(float64)),
-				Pressure: (float32)(result_ts["f"].(float64)),
-				Altitude: (float32)(result_ts["altitude"].(float64)),
-				Azimuth:  (float32)(result_ts["azimuth"].(float64)),
-			}
-			err = db.Debug().Create(&result_ts_).Error
-			if err != nil {
-				return c.JSON(http.StatusOK, echo.Map{
-					"result": -7,
-				})
-			}
-		}
+		log.Println(user)
+		return c.JSON(http.StatusOK, echo.Map{
+			"result":  0,
+			"user_id": user.ID,
+		})
 
 	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"result": -6,
+	})
+	//events, ok := json_map["events"].([]interface{})
+	//if ok != true {
+	//	return c.JSON(http.StatusOK, echo.Map{
+	//		"result": -1,
+	//		"error":  "no events in post data",
+	//	})
+	//}
+	//// it is need to deal with error when the length of array of events is zero
+	//event, ok := events[0].(map[string]interface{})
+	//if ok != true {
+	//	return c.JSON(http.StatusOK, echo.Map{
+	//		"result": -1,
+	//		"error":  "the type of event is not valid",
+	//	})
+	//}
+	//source, ok := event["source"].(map[string]interface{})
+	//if ok != true {
+	//	return c.JSON(http.StatusOK, echo.Map{
+	//		"result": -1,
+	//		"error":  "no source in event data",
+	//	})
+	//}
+	//user_id, ok := source["userId"].(string)
+	//log.Println(events)
+	////get username from userId
+	////Encrypt userId
+	//return c.JSON(http.StatusOK, echo.Map{
+	//	"result":  0,
+	//	"user_id": user_id,
+	//})
+}
+
+func SaveInputDatas(c echo.Context) error {
+	//db := database.GetDB()
 	return c.JSON(http.StatusOK, echo.Map{
 		"result": 0,
-		"task":   task_,
 	})
 }
 
-func GetResults(c echo.Context) error {
-	db := database.GetDB()
-
-	score_max := c.QueryParam("score_max")
-	score_min := c.QueryParam("score_min")
-	log.Println(score_max, score_min)
-	if score_max == "" || score_min == "" {
-		var results []model.Result
-		err := db.Find(&results).Error
-		if err != nil {
-			log.Println(err)
-			return c.JSON(http.StatusOK, echo.Map{
-				"result": -2,
-			})
-		}
-
-		return c.JSON(http.StatusOK, echo.Map{
-			"result":  0,
-			"results": results,
-		})
-	} else {
-		var results []model.Result
-
-		if err := db.Find(&results, "score >= ? AND score <= ?", score_min, score_max).Error; err != nil {
-			log.Println(err)
-			return c.JSON(http.StatusOK, echo.Map{
-				"result": -3,
-			})
-		}
-
-		return c.JSON(http.StatusOK, echo.Map{
-			"result":  0,
-			"results": results,
-		})
-
-	}
-}
-
-func GetTasks(c echo.Context) error {
-	db := database.GetDB()
-
-	var tasks []model.Task
-	if err := db.Find(&tasks).Error; err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -2,
-		})
-	}
-
+func GetUser(c echo.Context) error {
+	//db := database.GetDB()
 	return c.JSON(http.StatusOK, echo.Map{
-		"result":  0,
-		"results": tasks,
+		"result": 0,
 	})
 }
 
-func GetResultTimeSeries(c echo.Context) error {
-	db := database.GetDB()
-
-	type Payload struct {
-		IDs []uuid.UUID
-	}
-	payload := Payload{}
-	if err := c.Bind(&payload); err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -1,
-		})
-
-	}
-
-	var result model.Result
-	if err := db.Preload("ResultTimeSeriess").Find(&result, payload.IDs).Error; err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -2,
-		})
-	}
-
+func GetUsers(c echo.Context) error {
+	//db := database.GetDB()
 	return c.JSON(http.StatusOK, echo.Map{
-		"result":  0,
-		"results": result.ResultTimeSeriess,
+		"result": 0,
 	})
 }
 
-func GetResultParam(c echo.Context) error {
-	db := database.GetDB()
-
-	type Payload struct {
-		IDs []uuid.UUID
-	}
-	payload := Payload{}
-	if err := c.Bind(&payload); err != nil {
-		return err
-	}
-
-	var result model.Result
-	if err := db.Preload("ResultParams").Find(&result, payload.IDs).Error; err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -2,
-		})
-	}
-
+func GetInputDatas(c echo.Context) error {
+	//db := database.GetDB()
 	return c.JSON(http.StatusOK, echo.Map{
-		"result":  0,
-		"results": result.ResultParams,
+		"result": 0,
 	})
 }
