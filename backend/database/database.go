@@ -1,9 +1,9 @@
 package database
 
 import (
-	"athlete_data_input/config"
-	"athlete_data_input/model"
 	"fmt"
+	"sketch_hit/config"
+	"sketch_hit/model"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,8 +30,10 @@ func Init() {
 	db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
 
 	//Migrate
-	db.AutoMigrate(&model.User{})
-	db.AutoMigrate(&model.InputData{})
+	db.AutoMigrate(&model.Task{})
+	db.AutoMigrate(&model.Result{})
+	db.AutoMigrate(&model.ResultParam{})
+	db.AutoMigrate(&model.ResultTimeSeries{})
 
 	//Insert sample data
 	{
