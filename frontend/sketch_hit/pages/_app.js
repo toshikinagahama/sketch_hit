@@ -9,4 +9,5 @@ function MyApp({ Component, pageProps }) {
   );
 }
 
+MyApp.getInitialProps = async () => ({ pageProps: {} });
 export default MyApp;

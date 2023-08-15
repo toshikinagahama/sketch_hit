@@ -14,6 +14,7 @@ func main() {
 		panic(err)
 	}
 	log.Println(cfg.Version)
+	log.Println(cfg.Environment)
 
 	database.Init()
 	defer database.Close()

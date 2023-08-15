@@ -34,6 +34,7 @@ func Init() {
 	db.AutoMigrate(&model.Result{})
 	db.AutoMigrate(&model.ResultParam{})
 	db.AutoMigrate(&model.ResultTimeSeries{})
+	db.AutoMigrate(&model.ResultRawTimeSeries{})
 
 	//Insert sample data
 	{

@@ -53,6 +53,8 @@ func SaveResult(c echo.Context) error {
 		})
 	}
 
+	results_raw_time_series, is_ok_raw_time_series := json_map["results_raw_time_series"].([]interface{})
+
 	//log.Println(results)
 	//log.Println(results_time_series)
 	//log.Println(task)
@@ -134,7 +136,7 @@ func SaveResult(c echo.Context) error {
 		}
 
 		if result_type == "line" {
-			//円の場合
+			//線の場合
 			result_param_ := model.ResultParam{
 				ResultID: result_.ID,
 				Key:      "x",
@@ -188,9 +190,63 @@ func SaveResult(c echo.Context) error {
 			}
 		}
 
+		if result_type == "ellipse" {
+			//楕円の場合
+			result_param_ := model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "x",
+				Value:    (float32)(result["x"].(float64)),
+			}
+
+			err = db.Debug().Create(&result_param_).Error
+			if err != nil {
+				return c.JSON(http.StatusOK, echo.Map{
+					"result": -6,
+				})
+			}
+
+			result_param_ = model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "y",
+				Value:    (float32)(result["y"].(float64)),
+			}
+
+			err = db.Debug().Create(&result_param_).Error
+			if err != nil {
+				return c.JSON(http.StatusOK, echo.Map{
+					"result": -6,
+				})
+			}
+
+			result_param_ = model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "r_l",
+				Value:    (float32)(result["r_l"].(float64)),
+			}
+
+			result_param_ = model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "r_s",
+				Value:    (float32)(result["r_s"].(float64)),
+			}
+
+			result_param_ = model.ResultParam{
+				ResultID: result_.ID,
+				Key:      "a",
+				Value:    (float32)(result["a"].(float64)),
+			}
+
+			err = db.Debug().Create(&result_param_).Error
+			if err != nil {
+				return c.JSON(http.StatusOK, echo.Map{
+					"result": -6,
+				})
+			}
+		}
+
 		for i := 0; i < len(result_time_series); i++ {
 			result_ts := result_time_series[i].(map[string]interface{})
-			log.Println(result_ts)
+			//log.Println(result_ts)
 			result_ts_ := model.ResultTimeSeries{
 				ResultID: result_.ID,
 				Index:    (uint)(result_ts["index"].(float64)),
@@ -209,6 +265,30 @@ func SaveResult(c echo.Context) error {
 				return c.JSON(http.StatusOK, echo.Map{
 					"result": -7,
 				})
+			}
+		}
+
+		if is_ok_raw_time_series {
+			result_raw_time_series := results_raw_time_series[i].([]interface{})
+			for i := 0; i < len(result_raw_time_series); i++ {
+				result_raw_ts := result_raw_time_series[i].(map[string]interface{})
+				//log.Println(result_raw_ts)
+				result_raw_ts_ := model.ResultRawTimeSeries{
+					ResultID: result_.ID,
+					Index:    (uint)(result_raw_ts["index"].(float64)),
+					Time:     (int)(result_raw_ts["t"].(float64)),
+					X:        (float32)(result_raw_ts["x"].(float64)),
+					Y:        (float32)(result_raw_ts["y"].(float64)),
+					Pressure: (float32)(result_raw_ts["f"].(float64)),
+					Altitude: (float32)(result_raw_ts["altitude"].(float64)),
+					Azimuth:  (float32)(result_raw_ts["azimuth"].(float64)),
+				}
+				err = db.Debug().Create(&result_raw_ts_).Error
+				if err != nil {
+					return c.JSON(http.StatusOK, echo.Map{
+						"result": -8,
+					})
+				}
 			}
 		}
 
@@ -278,7 +358,7 @@ func GetResultTimeSeries(c echo.Context) error {
 	db := database.GetDB()
 
 	type Payload struct {
-		IDs []uuid.UUID
+		IDs []uuid.UUID `json:"ids"`
 	}
 	payload := Payload{}
 	if err := c.Bind(&payload); err != nil {
@@ -300,6 +380,35 @@ func GetResultTimeSeries(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"result":  0,
 		"results": result.ResultTimeSeriess,
+	})
+}
+
+func GetResultRawTimeSeries(c echo.Context) error {
+	db := database.GetDB()
+
+	type Payload struct {
+		IDs []uuid.UUID `json:"ids"`
+	}
+	payload := Payload{}
+	if err := c.Bind(&payload); err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -1,
+		})
+
+	}
+
+	var result model.Result
+	if err := db.Preload("ResultRawTimeSeriess").Find(&result, payload.IDs).Error; err != nil {
+		log.Println(err)
+		return c.JSON(http.StatusOK, echo.Map{
+			"result": -2,
+		})
+	}
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"result":  0,
+		"results": result.ResultRawTimeSeriess,
 	})
 }
 
