@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"sketch_hit/database"
@@ -52,8 +51,6 @@ func SaveResult(c echo.Context) error {
 			"result": -4,
 		})
 	}
-
-	results_raw_time_series, is_ok_raw_time_series := json_map["results_raw_time_series"].([]interface{})
 
 	// log.Println(results)
 	// log.Println(results_time_series)
@@ -267,31 +264,6 @@ func SaveResult(c echo.Context) error {
 				})
 			}
 		}
-
-		if is_ok_raw_time_series {
-			result_raw_time_series := results_raw_time_series[i].([]interface{})
-			for i := 0; i < len(result_raw_time_series); i++ {
-				result_raw_ts := result_raw_time_series[i].(map[string]interface{})
-				// log.Println(result_raw_ts)
-				result_raw_ts_ := model.ResultRawTimeSeries{
-					ResultID: result_.ID,
-					Index:    (uint)(result_raw_ts["index"].(float64)),
-					Time:     (int)(result_raw_ts["t"].(float64)),
-					X:        (float32)(result_raw_ts["x"].(float64)),
-					Y:        (float32)(result_raw_ts["y"].(float64)),
-					Pressure: (float32)(result_raw_ts["f"].(float64)),
-					Altitude: (float32)(result_raw_ts["altitude"].(float64)),
-					Azimuth:  (float32)(result_raw_ts["azimuth"].(float64)),
-				}
-				err = db.Debug().Create(&result_raw_ts_).Error
-				if err != nil {
-					return c.JSON(http.StatusOK, echo.Map{
-						"result": -8,
-					})
-				}
-			}
-		}
-
 	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"result": 0,
@@ -361,12 +333,22 @@ func GetResultTimeSeries(c echo.Context) error {
 		IDs []uuid.UUID `json:"ids"`
 	}
 	payload := Payload{}
+
 	if err := c.Bind(&payload); err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusOK, echo.Map{
 			"result": -1,
 		})
 
+	}
+
+	if len(payload.IDs) == 0 {
+		// もしIDsが空だったら、なぜかすべての結果を返してしまうので、ここで処理
+		res := []model.ResultParam{}
+		return c.JSON(http.StatusOK, echo.Map{
+			"result":  0,
+			"results": res,
+		})
 	}
 
 	var result model.Result
@@ -376,40 +358,18 @@ func GetResultTimeSeries(c echo.Context) error {
 			"result": -2,
 		})
 	}
+	if len(result.ResultTimeSeriess) == 0 {
+		res := []model.ResultParam{}
+		return c.JSON(http.StatusOK, echo.Map{
+			"result":  0,
+			"results": res,
+		})
+	}
+	// log.Println(result.ResultTimeSeriess)
 
 	return c.JSON(http.StatusOK, echo.Map{
 		"result":  0,
 		"results": result.ResultTimeSeriess,
-	})
-}
-
-func GetResultRawTimeSeries(c echo.Context) error {
-	db := database.GetDB()
-
-	type Payload struct {
-		IDs []uuid.UUID `json:"ids"`
-	}
-	payload := Payload{}
-	if err := c.Bind(&payload); err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -1,
-		})
-
-	}
-
-	var result model.Result
-	fmt.Println(payload.IDs)
-	if err := db.Preload("ResultRawTimeSeriess").Find(&result, payload.IDs).Error; err != nil {
-		log.Println(err)
-		return c.JSON(http.StatusOK, echo.Map{
-			"result": -2,
-		})
-	}
-
-	return c.JSON(http.StatusOK, echo.Map{
-		"result":  0,
-		"results": result.ResultRawTimeSeriess,
 	})
 }
 
