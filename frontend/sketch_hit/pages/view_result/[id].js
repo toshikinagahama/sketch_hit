@@ -12,7 +12,7 @@ function Box(props) {
   const [hovered, hover] = useState(false);
   const [clicked, click] = useState(false);
   let i = 0;
-  console.log(props.ts);
+  //console.log(props.ts);
   useFrame((state, delta) => {
     if (props.ts == null) return;
     let ts = props.ts[parseInt(i / 10)];
