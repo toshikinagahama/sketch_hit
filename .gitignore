@@ -1,4 +1,6 @@
 .env
+.env.dev
+.env.prod
 config.yaml
 .DS_Store
 node_modules/

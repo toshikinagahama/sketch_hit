@@ -56,18 +56,15 @@ const Circle_1 = () => {
     //set target circle
     let cs = []; //circles
     cs.push(
-      { x: 100, y: 200, r: 50 },
-      { x: 300, y: 200, r: 50 },
-      { x: 500, y: 200, r: 50 },
-      { x: 700, y: 200, r: 50 },
-      { x: 100, y: 400, r: 50 },
-      { x: 300, y: 400, r: 50 },
-      { x: 500, y: 400, r: 50 },
-      { x: 700, y: 400, r: 50 },
-      { x: 100, y: 600, r: 50 },
-      { x: 300, y: 600, r: 50 },
-      { x: 500, y: 600, r: 50 },
-      { x: 700, y: 600, r: 50 }
+      { x: 100, y: 200, r: 80 },
+      { x: 350, y: 200, r: 80 },
+      { x: 600, y: 200, r: 80 },
+      { x: 100, y: 400, r: 80 },
+      { x: 350, y: 400, r: 80 },
+      { x: 600, y: 400, r: 80 },
+      { x: 100, y: 600, r: 80 },
+      { x: 350, y: 600, r: 80 },
+      { x: 600, y: 600, r: 80 }
     );
     setTargetCircles(cs);
     setStartTIme(performance.now());
@@ -237,6 +234,7 @@ const Circle_1 = () => {
     if (cnt_valid_score != 0) score_mean /= cnt_valid_score;
     else score_mean = 0;
 
+    console.log(`${http_protcol}://${domain_db}/save_result`);
     const res = await fetch(`${http_protcol}://${domain_db}/save_result`, {
       method: 'POST',
       headers: {

@@ -2,9 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-
 	"sketch_hit/database"
 	"sketch_hit/model"
 
@@ -55,10 +55,10 @@ func SaveResult(c echo.Context) error {
 
 	results_raw_time_series, is_ok_raw_time_series := json_map["results_raw_time_series"].([]interface{})
 
-	//log.Println(results)
-	//log.Println(results_time_series)
-	//log.Println(task)
-	//登録処理
+	// log.Println(results)
+	// log.Println(results_time_series)
+	// log.Println(task)
+	// 登録処理
 	task_ := model.Task{
 		Type:     task["type"].(string),
 		Username: task["username"].(string),
@@ -94,7 +94,7 @@ func SaveResult(c echo.Context) error {
 		}
 
 		if result_type == "circle" {
-			//円の場合
+			// 円の場合
 			result_param_ := model.ResultParam{
 				ResultID: result_.ID,
 				Key:      "x",
@@ -136,7 +136,7 @@ func SaveResult(c echo.Context) error {
 		}
 
 		if result_type == "line" {
-			//線の場合
+			// 線の場合
 			result_param_ := model.ResultParam{
 				ResultID: result_.ID,
 				Key:      "x",
@@ -191,7 +191,7 @@ func SaveResult(c echo.Context) error {
 		}
 
 		if result_type == "ellipse" {
-			//楕円の場合
+			// 楕円の場合
 			result_param_ := model.ResultParam{
 				ResultID: result_.ID,
 				Key:      "x",
@@ -246,7 +246,7 @@ func SaveResult(c echo.Context) error {
 
 		for i := 0; i < len(result_time_series); i++ {
 			result_ts := result_time_series[i].(map[string]interface{})
-			//log.Println(result_ts)
+			// log.Println(result_ts)
 			result_ts_ := model.ResultTimeSeries{
 				ResultID: result_.ID,
 				Index:    (uint)(result_ts["index"].(float64)),
@@ -272,7 +272,7 @@ func SaveResult(c echo.Context) error {
 			result_raw_time_series := results_raw_time_series[i].([]interface{})
 			for i := 0; i < len(result_raw_time_series); i++ {
 				result_raw_ts := result_raw_time_series[i].(map[string]interface{})
-				//log.Println(result_raw_ts)
+				// log.Println(result_raw_ts)
 				result_raw_ts_ := model.ResultRawTimeSeries{
 					ResultID: result_.ID,
 					Index:    (uint)(result_raw_ts["index"].(float64)),
@@ -307,7 +307,7 @@ func GetResults(c echo.Context) error {
 	log.Println(score_max, score_min)
 	if score_max == "" || score_min == "" {
 		var results []model.Result
-		err := db.Find(&results).Error
+		err := db.Debug().Preload("ResultParams").Find(&results).Error
 		if err != nil {
 			log.Println(err)
 			return c.JSON(http.StatusOK, echo.Map{
@@ -399,6 +399,7 @@ func GetResultRawTimeSeries(c echo.Context) error {
 	}
 
 	var result model.Result
+	fmt.Println(payload.IDs)
 	if err := db.Preload("ResultRawTimeSeriess").Find(&result, payload.IDs).Error; err != nil {
 		log.Println(err)
 		return c.JSON(http.StatusOK, echo.Map{
