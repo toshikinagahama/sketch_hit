@@ -26,9 +26,8 @@ type Result struct {
 	Type   string    `json:"type"`
 	Score  float32   `json:"score" gorm:"type:real"`
 
-	ResultParams         []ResultParam
-	ResultTimeSeriess    []ResultTimeSeries
-	ResultRawTimeSeriess []ResultRawTimeSeries
+	ResultParams      []ResultParam
+	ResultTimeSeriess []ResultTimeSeries
 }
 
 type ResultParam struct {
@@ -48,18 +47,6 @@ type ResultTimeSeries struct {
 	X        float32   `json:"x" gorm:"type:real"`
 	Y        float32   `json:"y" gorm:"type:real"`
 	Distance float32   `json:"distance" gorm:"type:real"`
-	Pressure float32   `json:"pressure" gorm:"type:real"`
-	Altitude float32   `json:"altitude" gorm:"type:real"`
-	Azimuth  float32   `json:"azimuth" gorm:"type:real"`
-}
-
-type ResultRawTimeSeries struct {
-	ID       uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
-	ResultID uuid.UUID `json:"result_id" gorm:"type:uuid"`
-	Index    uint      `json:"index"`
-	Time     int       `json:"time"`
-	X        float32   `json:"x" gorm:"type:real"`
-	Y        float32   `json:"y" gorm:"type:real"`
 	Pressure float32   `json:"pressure" gorm:"type:real"`
 	Altitude float32   `json:"altitude" gorm:"type:real"`
 	Azimuth  float32   `json:"azimuth" gorm:"type:real"`

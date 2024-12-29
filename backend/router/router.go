@@ -38,7 +38,6 @@ func NewRouter() (*echo.Echo, error) {
 	router.GET(cfg.BasePath+"/backend/api/get_results", handler.GetResults)
 	router.GET(cfg.BasePath+"/backend/api/get_tasks", handler.GetTasks)
 	router.POST(cfg.BasePath+"/backend/api/get_result_timeseries", handler.GetResultTimeSeries)
-	router.POST(cfg.BasePath+"/backend/api/get_result_raw_timeseries", handler.GetResultRawTimeSeries)
 	router.POST(cfg.BasePath+"/backend/api/get_result_param", handler.GetResultParam)
 
 	return router, nil

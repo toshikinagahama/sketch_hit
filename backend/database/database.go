@@ -17,7 +17,7 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-	var dsn = fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=disable TimeZone=Asia/Tokyo", cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBHost, cfg.DBPort)
+	dsn := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%d sslmode=disable TimeZone=Asia/Tokyo", cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBHost, cfg.DBPort)
 	db, err = gorm.Open(postgres.New(postgres.Config{
 		DSN:                  dsn,
 		PreferSimpleProtocol: true, // disables implicit prepared statement usage
@@ -26,17 +26,16 @@ func Init() {
 		panic(err)
 	}
 
-	//Enable to use uuid
+	// Enable to use uuid
 	db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
 
-	//Migrate
+	// Migrate
 	db.AutoMigrate(&model.Task{})
 	db.AutoMigrate(&model.Result{})
 	db.AutoMigrate(&model.ResultParam{})
 	db.AutoMigrate(&model.ResultTimeSeries{})
-	db.AutoMigrate(&model.ResultRawTimeSeries{})
 
-	//Insert sample data
+	// Insert sample data
 	{
 	}
 }
